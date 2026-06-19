@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum EventStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+  WAITLIST
+  CANCELLED
+}
+
+enum AttendanceMethod {
+  QR
+  MANUAL
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  passwordHash       String?
+  googleId           String?   @unique
+  role               Role      @default(STUDENT)
+  emailVerified      Boolean   @default(false)
+  verificationCode   String?
+  codeExpiresAt      DateTime?
+  avatar             String?
+  createdAt          DateTime  @default(now())
+
+  eventsCreated      Event[]          @relation("CreatedBy")
+  eventsApproved     Event[]          @relation("ApprovedBy")
+  registrations      EventRegistration[]
+  attendance         Attendance[]
+  notifications      Notification[]
+}
+
+model Event {
+  id                   String      @id @default(cuid())
+  title                String
+  description          String
+  category             String
+  tags                 String[]
+  startAt              DateTime
+  endAt                DateTime
+  location             String
+  onlineLink           String?
+  capacity             Int?
+  waitlistEnabled      Boolean     @default(false)
+  registrationDeadline DateTime?
+  status               EventStatus @default(PENDING)
+  coverImageUrl        String?
+  createdAt            DateTime    @default(now())
+
+  createdById          String
+  createdBy            User        @relation("CreatedBy", fields: [createdById], references: [id])
+  approvedById         String?
+  approvedBy           User?       @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  registrations        EventRegistration[]
+  attendance           Attendance[]
+  attachments          EventAttachment[]
+}
+
+model EventRegistration {
+  id           String             @id @default(cuid())
+  eventId      String
+  userId       String
+  status       RegistrationStatus @default(CONFIRMED)
+  registeredAt DateTime           @default(now())
+
+  event        Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  eventId     String
+  userId      String
+  method      AttendanceMethod @default(QR)
+  checkedInAt DateTime         @default(now())
+
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model EventAttachment {
+  id        String   @id @default(cuid())
+  eventId   String
+  fileName  String
+  fileUrl   String
+  fileType  String
+  uploadedAt DateTime @default(now())
+
+  event     Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
