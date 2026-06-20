@@ -31,9 +31,11 @@ async function submit() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center px-4" style="background:#050510;">
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-      <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-20"
-        style="background:radial-gradient(circle,#06b6d4,transparent 70%); filter:blur(80px);" />
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <div class="absolute -top-20 -left-20 w-[500px] h-[500px] rounded-full opacity-25"
+        style="background:radial-gradient(circle,#06b6d4,transparent 65%); filter:blur(80px); animation:aurora 10s ease infinite;" />
+      <div class="absolute -bottom-20 -right-20 w-[500px] h-[500px] rounded-full opacity-20"
+        style="background:radial-gradient(circle,#6366f1,transparent 65%); filter:blur(80px); animation:aurora 13s ease infinite reverse;" />
     </div>
 
     <div class="relative w-full max-w-md z-10 text-center">
@@ -41,8 +43,8 @@ async function submit() {
         <span class="font-heading font-bold text-2xl gradient-text">SchoolEvents</span>
       </RouterLink>
 
-      <SpotlightCard spotlight-color="rgba(6,182,212,0.08)" class="rounded-3xl p-8"
-        style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(24px);">
+      <SpotlightCard spotlight-color="rgba(6,182,212,0.12)" class="rounded-3xl p-8"
+        style="background:rgba(13,13,32,0.85); border:1px solid rgba(6,182,212,0.25); backdrop-filter:blur(24px); box-shadow:0 0 60px rgba(6,182,212,0.1), inset 0 1px 0 rgba(255,255,255,0.06);">
 
         <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style="background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.2);">

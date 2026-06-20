@@ -38,10 +38,13 @@ const inputBlur = (e: FocusEvent) => ((e.target as HTMLInputElement).style.borde
 
 <template>
   <div class="min-h-screen flex items-center justify-center px-4 py-10" style="background:#050510;">
-    <!-- Glow bg -->
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-      <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20"
-        style="background:radial-gradient(circle,#8b5cf6,transparent 70%); filter:blur(80px);" />
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <div class="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full opacity-30"
+        style="background:radial-gradient(circle,#8b5cf6,transparent 65%); filter:blur(80px); animation:aurora 11s ease infinite;" />
+      <div class="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full opacity-25"
+        style="background:radial-gradient(circle,#6366f1,transparent 65%); filter:blur(80px); animation:aurora 9s ease infinite reverse;" />
+      <div class="absolute top-1/2 right-1/4 w-[300px] h-[300px] rounded-full opacity-15"
+        style="background:radial-gradient(circle,#06b6d4,transparent 70%); filter:blur(80px);" />
     </div>
 
     <div class="relative w-full max-w-md z-10">
@@ -49,8 +52,8 @@ const inputBlur = (e: FocusEvent) => ((e.target as HTMLInputElement).style.borde
         <span class="font-heading font-bold text-2xl gradient-text">SchoolEvents</span>
       </RouterLink>
 
-      <SpotlightCard spotlight-color="rgba(139,92,246,0.1)" class="rounded-3xl p-8"
-        style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(24px);">
+      <SpotlightCard spotlight-color="rgba(139,92,246,0.15)" class="rounded-3xl p-8"
+        style="background:rgba(13,13,32,0.85); border:1px solid rgba(139,92,246,0.25); backdrop-filter:blur(24px); box-shadow:0 0 60px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.06);">
 
         <h1 class="font-heading font-bold text-2xl text-white mb-1">Regisztráció</h1>
         <p class="text-slate-400 text-sm mb-7">Hozz létre fiókot az iskolai eseményekhez</p>

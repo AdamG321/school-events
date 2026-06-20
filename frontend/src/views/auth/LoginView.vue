@@ -29,10 +29,14 @@ async function submit() {
 
 <template>
   <div class="min-h-screen flex items-center justify-center px-4" style="background:#050510;">
-    <!-- Glow -->
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-      <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20"
-        style="background:radial-gradient(circle,#6366f1,transparent 70%); filter:blur(80px);" />
+    <!-- Animated gradient mesh background -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <div class="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full opacity-30"
+        style="background:radial-gradient(circle,#6366f1,transparent 65%); filter:blur(80px); animation:aurora 10s ease infinite;" />
+      <div class="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full opacity-25"
+        style="background:radial-gradient(circle,#8b5cf6,transparent 65%); filter:blur(80px); animation:aurora 12s ease infinite reverse;" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-15"
+        style="background:radial-gradient(circle,#06b6d4,transparent 70%); filter:blur(100px);" />
     </div>
 
     <div class="relative w-full max-w-md z-10">
@@ -42,9 +46,9 @@ async function submit() {
       </RouterLink>
 
       <SpotlightCard
-        spotlight-color="rgba(99,102,241,0.1)"
+        spotlight-color="rgba(99,102,241,0.15)"
         class="rounded-3xl p-8"
-        style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(24px);">
+        style="background:rgba(13,13,32,0.85); border:1px solid rgba(99,102,241,0.25); backdrop-filter:blur(24px); box-shadow:0 0 60px rgba(99,102,241,0.12), inset 0 1px 0 rgba(255,255,255,0.06);">
 
         <h1 class="font-heading font-bold text-2xl text-white mb-1">Bejelentkezés</h1>
         <p class="text-slate-400 text-sm mb-7">Üdv vissza!</p>
