@@ -30,7 +30,20 @@ const features = [
 <template>
   <div class="relative min-h-screen overflow-hidden" style="background:#050510;">
     <!-- BallPit animated bg -->
-    <BallPit />
+    <div class="absolute inset-0">
+      <BallPit
+        :count="180"
+        :gravity="0.4"
+        :friction="0.9975"
+        :wall-bounce="0.95"
+        :follow-cursor="true"
+        :colors="[0x6366f1, 0x8b5cf6, 0x06b6d4, 0xec4899]"
+        :min-size="0.3"
+        :max-size="0.8"
+        :ambient-intensity="0.8"
+        :light-intensity="150"
+      />
+    </div>
 
     <!-- Radial glow overlays -->
     <div class="absolute inset-0 pointer-events-none">

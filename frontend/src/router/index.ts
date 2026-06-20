@@ -7,7 +7,7 @@ const router = createRouter({
     { path: '/', component: () => import('../views/LandingView.vue') },
     { path: '/login', component: () => import('../views/auth/LoginView.vue') },
     { path: '/register', component: () => import('../views/auth/RegisterView.vue') },
-    { path: '/verify-email', component: () => import('../views/auth/VerifyView.vue') },
+    { path: '/sso-callback', component: () => import('../views/auth/SsoCallbackView.vue') },
     {
       path: '/dashboard',
       component: () => import('../views/DashboardView.vue'),
@@ -41,10 +41,23 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
-  const auth = useAuthStore()
-  if (to.meta.requiresAuth && !auth.isLoggedIn) return '/login'
-  if (to.meta.roles && !(to.meta.roles as string[]).includes(auth.user?.role ?? '')) return '/dashboard'
+router.beforeEach(async (to) => {
+  if (!to.meta.requiresAuth) return
+
+  // Wait for Clerk to initialise
+  const clerk = (window as any).Clerk
+  if (clerk) await clerk.load()
+
+  const isSignedIn = !!(window as any).Clerk?.user
+  if (!isSignedIn) return '/login'
+
+  // Role guard — only checked after dbUser is loaded
+  if (to.meta.roles) {
+    const auth = useAuthStore()
+    if (auth.dbUser && !(to.meta.roles as string[]).includes(auth.dbUser.role)) {
+      return '/dashboard'
+    }
+  }
 })
 
 export default router

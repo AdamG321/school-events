@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useAuth, useUser } from '@clerk/vue'
 import api from '../api/client'
 
 export interface User {
@@ -8,50 +9,49 @@ export interface User {
   email: string
   role: 'STUDENT' | 'TEACHER' | 'ADMIN'
   avatar?: string
-  emailVerified: boolean
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('token'))
+  const { isSignedIn, signOut } = useAuth()
+  const { user: clerkUser } = useUser()
+  const dbUser = ref<User | null>(null)
 
-  const isLoggedIn = computed(() => !!token.value && !!user.value)
-  const isAdmin = computed(() => user.value?.role === 'ADMIN')
-  const isTeacher = computed(() => user.value?.role === 'TEACHER' || user.value?.role === 'ADMIN')
+  const isLoggedIn = computed(() => !!isSignedIn.value && !!dbUser.value)
+  const isAdmin = computed(() => dbUser.value?.role === 'ADMIN')
+  const isTeacher = computed(() => dbUser.value?.role === 'TEACHER' || dbUser.value?.role === 'ADMIN')
+  const user = computed(() => dbUser.value)
 
   async function fetchMe() {
-    if (!token.value) return
+    if (!isSignedIn.value) return
     try {
       const res = await api.get('/auth/me')
-      user.value = res.data
+      dbUser.value = res.data
     } catch {
-      logout()
+      dbUser.value = null
     }
   }
 
-  async function login(email: string, password: string) {
-    const res = await api.post('/auth/login', { email, password })
-    token.value = res.data.token
-    user.value = res.data.user
-    localStorage.setItem('token', res.data.token)
+  async function syncUser(role: string) {
+    const res = await api.post('/auth/sync', { role })
+    dbUser.value = res.data
+    return res.data as User
   }
 
-  async function register(name: string, email: string, password: string, role: string) {
-    await api.post('/auth/register', { name, email, password, role })
+  async function logout() {
+    await signOut()
+    dbUser.value = null
   }
 
-  async function verifyEmail(code: string) {
-    const res = await api.post('/auth/verify-email', { code })
-    token.value = res.data.token
-    user.value = res.data.user
-    localStorage.setItem('token', res.data.token)
+  return {
+    isSignedIn,
+    clerkUser,
+    dbUser,
+    user,
+    isLoggedIn,
+    isAdmin,
+    isTeacher,
+    fetchMe,
+    syncUser,
+    logout,
   }
-
-  function logout() {
-    user.value = null
-    token.value = null
-    localStorage.removeItem('token')
-  }
-
-  return { user, token, isLoggedIn, isAdmin, isTeacher, fetchMe, login, register, verifyEmail, logout }
 })

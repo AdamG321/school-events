@@ -1,10 +1,13 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
-import jwt from '@fastify/jwt'
+import { createClerkClient } from '@clerk/backend'
+import prisma from './lib/prisma'
 import authRoutes from './routes/auth'
 import eventRoutes from './routes/events'
 import adminRoutes from './routes/admin'
+
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY! })
 
 const app = Fastify({ logger: true })
 
@@ -13,16 +16,32 @@ app.register(cors, {
   credentials: true,
 })
 
-app.register(jwt, {
-  secret: process.env.JWT_SECRET || 'change-me-in-production',
-})
-
-// Auth decorator
+// Clerk auth decorator — verifies token + lazy user creation in DB
 app.decorate('authenticate', async (request: any, reply: any) => {
+  const authHeader = request.headers.authorization
+  if (!authHeader?.startsWith('Bearer ')) return reply.code(401).send({ message: 'Unauthorized' })
+
   try {
-    await request.jwtVerify()
+    const token = authHeader.slice(7)
+    const payload = await clerk.verifyToken(token)
+    const clerkId = payload.sub
+
+    let user = await prisma.user.findUnique({ where: { clerkId } })
+    if (!user) {
+      const cu = await clerk.users.getUser(clerkId)
+      user = await prisma.user.create({
+        data: {
+          clerkId,
+          name: [cu.firstName, cu.lastName].filter(Boolean).join(' ') || 'Felhasználó',
+          email: cu.emailAddresses[0]?.emailAddress || '',
+          avatar: cu.imageUrl,
+        },
+      })
+    }
+
+    request.user = { id: user.id, role: user.role }
   } catch {
-    reply.code(401).send({ message: 'Unauthorized' })
+    return reply.code(401).send({ message: 'Unauthorized' })
   }
 })
 

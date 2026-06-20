@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useAuthStore } from '../../stores/auth'
+import { useSignIn } from '@clerk/vue'
 import { useRouter } from 'vue-router'
 import SpotlightCard from '../../components/ui/SpotlightCard.vue'
+import DarkVeil from '../../components/bg/DarkVeil.vue'
+import { useAuthStore } from '../../stores/auth'
 
+const { signIn, isLoaded } = useSignIn()
 const auth = useAuthStore()
 const router = useRouter()
 
@@ -11,36 +14,44 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 async function submit() {
+  if (!isLoaded.value) return
   loading.value = true
   error.value = ''
   try {
-    await auth.login(email.value, password.value)
-    router.push('/dashboard')
+    const result = await signIn.value!.create({
+      identifier: email.value,
+      password: password.value,
+    })
+    if (result.status === 'complete') {
+      await auth.fetchMe()
+      router.push('/dashboard')
+    }
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Hibás email vagy jelszó.'
+    error.value = e.errors?.[0]?.longMessage || e.errors?.[0]?.message || 'Hibás email vagy jelszó.'
   } finally {
     loading.value = false
   }
+}
+
+function loginWithGoogle() {
+  signIn.value?.authenticateWithRedirect({
+    strategy: 'oauth_google',
+    redirectUrl: '/sso-callback',
+    redirectUrlComplete: '/dashboard',
+  })
 }
 </script>
 
 <template>
   <div class="min-h-screen flex items-center justify-center px-4" style="background:#050510;">
-    <!-- Animated gradient mesh background -->
-    <div class="fixed inset-0 pointer-events-none overflow-hidden">
-      <div class="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full opacity-30"
-        style="background:radial-gradient(circle,#6366f1,transparent 65%); filter:blur(80px); animation:aurora 10s ease infinite;" />
-      <div class="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full opacity-25"
-        style="background:radial-gradient(circle,#8b5cf6,transparent 65%); filter:blur(80px); animation:aurora 12s ease infinite reverse;" />
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-15"
-        style="background:radial-gradient(circle,#06b6d4,transparent 70%); filter:blur(100px);" />
+    <!-- DarkVeil animated background -->
+    <div class="fixed inset-0 pointer-events-none">
+      <DarkVeil :speed="0.4" :warp-amount="0.15" :noise-intensity="0.03" />
     </div>
 
     <div class="relative w-full max-w-md z-10">
-      <!-- Logo -->
       <RouterLink to="/" class="flex justify-center mb-8">
         <span class="font-heading font-bold text-2xl gradient-text">SchoolEvents</span>
       </RouterLink>
@@ -54,7 +65,7 @@ async function submit() {
         <p class="text-slate-400 text-sm mb-7">Üdv vissza!</p>
 
         <!-- Google OAuth -->
-        <a :href="`${apiUrl}/auth/google`"
+        <button @click="loginWithGoogle"
           class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-2xl text-sm font-medium text-slate-300 transition-all hover:text-white hover:border-white/20 mb-6"
           style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);">
           <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -64,7 +75,7 @@ async function submit() {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           Folytatás Google-lal
-        </a>
+        </button>
 
         <div class="flex items-center gap-3 mb-6">
           <div class="flex-1 h-px" style="background:rgba(255,255,255,0.08);" />
@@ -99,7 +110,7 @@ async function submit() {
             {{ error }}
           </div>
 
-          <button type="submit" :disabled="loading"
+          <button type="submit" :disabled="loading || !isLoaded"
             class="w-full py-3.5 rounded-xl font-semibold text-white text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 mt-2"
             style="background:linear-gradient(135deg,#6366f1,#8b5cf6); box-shadow:0 0 25px rgba(99,102,241,0.3);">
             {{ loading ? 'Bejelentkezés...' : 'Bejelentkezés' }}
