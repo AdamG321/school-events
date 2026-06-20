@@ -22,7 +22,7 @@
     "@fastify/cors": "^11.2.0",
     "@fastify/jwt": "^10.1.0",
     "@fastify/multipart": "^10.0.0",
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^5.22.0",
     "@types/nodemailer": "^8.0.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
@@ -31,8 +31,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
-    "prisma": "^7.8.0",
-    "typescript": "^6.0.3",
+    "prisma": "^5.22.0",
+    "typescript": "^5.8.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
