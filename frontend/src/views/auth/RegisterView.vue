@@ -40,7 +40,7 @@ async function submit() {
         <p class="text-gray-500 text-sm mb-6">Hozz létre fiókot az iskolai eseményekhez</p>
 
         <!-- Google OAuth -->
-        <a :href="`${$env?.VITE_API_URL || 'http://localhost:3000/api'}/auth/google`"
+        <a :href="`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/google`"
           class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 mb-6">
           <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="Google" />
           Folytatás Google-lal
