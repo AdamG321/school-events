@@ -10,6 +10,7 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 async function submit() {
   loading.value = true
@@ -36,7 +37,7 @@ async function submit() {
         <h1 class="font-heading font-bold text-2xl text-deep mb-2">Bejelentkezés</h1>
         <p class="text-gray-500 text-sm mb-6">Üdv vissza!</p>
 
-        <a :href="`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/google`"
+        <a :href="`${apiUrl}/auth/google`"
           class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all text-sm font-medium text-gray-700 mb-6">
           <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="Google" />
           Folytatás Google-lal
