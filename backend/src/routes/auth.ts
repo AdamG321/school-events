@@ -13,24 +13,37 @@ export default async function authRoutes(app: FastifyInstance) {
     const { name, email, password, role } = req.body as any
 
     const existing = await prisma.user.findUnique({ where: { email } })
-    if (existing) return reply.code(409).send({ message: 'Ez az email már regisztrálva van.' })
+    // Ha már van és VERIFIED → nem lehet újra regisztrálni
+    if (existing?.emailVerified) return reply.code(409).send({ message: 'Ez az email már regisztrálva van.' })
 
     const passwordHash = await bcrypt.hash(password, 12)
     const code = generateCode()
     const codeExpiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 perc
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        role: role === 'TEACHER' ? 'TEACHER' : 'STUDENT',
-        verificationCode: code,
-        codeExpiresAt,
-      },
-    })
+    if (existing && !existing.emailVerified) {
+      // Unverified user → frissítjük a kódot (újrapróbálkozás)
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { name, passwordHash, role: role === 'TEACHER' ? 'TEACHER' : 'STUDENT', verificationCode: code, codeExpiresAt },
+      })
+    } else {
+      await prisma.user.create({
+        data: {
+          name, email, passwordHash,
+          role: role === 'TEACHER' ? 'TEACHER' : 'STUDENT',
+          verificationCode: code, codeExpiresAt,
+        },
+      })
+    }
 
-    await sendVerificationEmail(email, name, code)
+    // Email küldés — hiba esetén nem crashel, kód a logban megjelenik
+    try {
+      await sendVerificationEmail(email, name, code)
+    } catch (emailErr) {
+      console.error('[EMAIL] SMTP hiba:', emailErr)
+      console.log(`[EMAIL] Megerősítő kód ${email} számára: ${code}`)
+    }
+
     return reply.code(201).send({ message: 'Regisztráció sikeres. Ellenőrizd az emailed!' })
   })
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HeroScene from '../components/three/HeroScene.vue'
+import BallPit from '../components/bg/BallPit.vue'
 import SpotlightCard from '../components/ui/SpotlightCard.vue'
 import { useRouter } from 'vue-router'
 
@@ -29,8 +29,8 @@ const features = [
 
 <template>
   <div class="relative min-h-screen overflow-hidden" style="background:#050510;">
-    <!-- Three.js animated bg -->
-    <HeroScene />
+    <!-- BallPit animated bg -->
+    <BallPit />
 
     <!-- Radial glow overlays -->
     <div class="absolute inset-0 pointer-events-none">
