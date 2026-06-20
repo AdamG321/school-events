@@ -22,7 +22,9 @@ async function submit() {
     await auth.register(name.value, email.value, password.value, role.value)
     router.push({ path: '/verify-email', query: { email: email.value } })
   } catch (e: any) {
-    error.value = e.response?.data?.message || 'Hiba történt. Próbáld újra.'
+    const msg = e.response?.data?.message || ''
+    const isTechnical = /prisma|table|sql|database|invocation/i.test(msg)
+    error.value = isTechnical || !msg ? 'Szerver hiba. Kérjük próbáld újra később.' : msg
   } finally {
     loading.value = false
   }
@@ -86,7 +88,10 @@ async function submit() {
             </div>
           </div>
 
-          <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
+          <div v-if="error" class="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <span class="mt-0.5 shrink-0">⚠️</span>
+            <span>{{ error }}</span>
+          </div>
 
           <button type="submit" :disabled="loading"
             class="w-full py-3.5 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/20">
